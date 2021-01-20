@@ -1,18 +1,16 @@
-import React from 'react';
+import React, {useEffect} from 'react';
 import {
   View,
   Text,
   StyleSheet,
-  Button,
   TouchableOpacity,
   Image,
   TextInput,
-  StatusBar,
 } from 'react-native';
 import {scale} from 'react-native-size-matters';
 
-import data from '../data/category';
 import {Transition, Transitioning} from 'react-native-reanimated';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const transition = (
   <Transition.Together>
@@ -26,6 +24,46 @@ export default function ModalScreen(props) {
   const [currentIndex, setCurrentIndex] = React.useState(null);
   const ref = React.useRef();
   const [text, setText] = React.useState('');
+
+
+  const [data, setData] = React.useState([]); 
+ 
+
+    useEffect(() => {
+      getData()
+    },[])
+
+  const getData = async () => {
+  
+    try {
+      const jsonValue = await AsyncStorage.getItem('@storage_Key')
+      //console.log(jsonValue);
+      setData(JSON.parse(jsonValue))
+      //return jsonValue != null ? JSON.parse(jsonValue) : null;
+      
+    } catch(e) {
+      // error reading value
+    }
+  }
+
+
+  const searchData = (text) => {
+    const category=data.filter((item) => {
+   
+      const cat= item.subCategories.filter((it)=>{
+        const itemData = it.subCategory.toUpperCase();
+       const textData = text.toUpperCase();    
+        return itemData.indexOf(textData) > -1;
+      })
+    
+        //setData([...data, { data : cat}]);
+
+    });
+
+  }
+
+
+
   return (
     <View style={{backgroundColor: '#fff', flex: 1}}>
       <View
@@ -64,10 +102,10 @@ export default function ModalScreen(props) {
               source={require('../assets/icons/search.png')}
             />
             <TextInput
-              placeholder="Search by Name"
+              placeholder="Search by Sub Category"
               style={styles.textInput}
-              onChangeText={(text) => this.searchData(text)}
-              value={setText}
+              onChangeText={(text) => searchData(text)}
+              value={props.text}
               underlineColorAndroid="transparent"
             />
           </View>
@@ -129,7 +167,7 @@ export default function ModalScreen(props) {
                           />
                         
                           <Text
-                            key={subCategory}
+                            //key={subCategory}
                             style={[styles.body, {color, width:scale(200)}]}>
                             {subCategory.subCategory}
                           </Text>
@@ -163,7 +201,6 @@ const styles = StyleSheet.create({
   },
   card: {
     flexGrow: 1,
-    // height:scale(90),
     margin: scale(5),
     borderRadius: scale(10),
     alignItems: 'center',
@@ -174,7 +211,6 @@ const styles = StyleSheet.create({
     textTransform: 'uppercase',
     width: scale(140),
     marginLeft: scale(40),
-    // marginRight: scale(50)
   },
   body: {
     fontSize: 20,

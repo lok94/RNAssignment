@@ -1,8 +1,28 @@
-import React from 'react';
+import React, {useEffect}  from 'react';
 import {View, Text, StyleSheet, TouchableOpacity} from 'react-native';
 import {scale} from 'react-native-size-matters';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import data from '../data/category';
+import SplashScreen from 'react-native-splash-screen'
 
 const HomeScreen = (props) => {
+
+
+  useEffect(() => {
+    storeData(data)
+    SplashScreen.hide();
+  },[])
+
+const storeData = async (value) => {
+  try {
+    const jsonValue = JSON.stringify(value)
+    await AsyncStorage.setItem('@storage_Key', jsonValue)
+  } catch (e) {
+    // saving error
+  }
+}
+
+
   return (
     <View style = {styles.container}>
       <TouchableOpacity 
